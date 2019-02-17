@@ -31,7 +31,8 @@ my_imputer = SimpleImputer()
 home_X = my_imputer.fit_transform(home_X_copy)
 test_X = my_imputer.fit_transform(test_X_copy)
 
-rf_model_on_full_data = RandomForestRegressor(n_estimators=924)
+#rf_model_on_full_data = RandomForestRegressor(n_estimators=924)
+rf_model_on_full_data = XGBRegressor(n_estimators=460)
 rf_model_on_full_data.fit(home_X,home_y)
 
 # make predictions which we will submit.
@@ -47,18 +48,20 @@ print("Done!")
 train_X, val_X, train_y, val_y = train_test_split(home_X, home_y, random_state=1)
 
 def tune(n_est):
-    rf_model = RandomForestRegressor(n_estimators=n_est,random_state=1)
+    rf_model = XGBRegressor(n_estimators=n_est,random_state=1)
     rf_model.fit(train_X, train_y)
     rf_val_predictions = rf_model.predict(val_X)
     rf_val_mae = mean_absolute_error(rf_val_predictions, val_y)
     return rf_val_mae
 
 min_n_est,min_mae=None,None
-for n_est in range(1,10000):
+for n_est in range(450,10000,1):
     mae=tune(n_est)
     if min_mae == None or mae < min_mae:
         min_n_est,min_mae = n_est,mae
         print(min_n_est,min_mae)
+    else:
+        print(n_est,'-----')
 print(min_n_est,min_mae)
 rf_val_mae=min_mae
 
